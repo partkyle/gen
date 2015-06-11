@@ -15,7 +15,9 @@ type MyType struct {
 }
 
 // +gen slice:"GroupBy[MyType]"
-type NewType struct{}
+type NewType struct {
+	m MyType
+}
 
 func main() {
 	t := []MyType{
@@ -24,15 +26,14 @@ func main() {
 		{name: "rawr"},
 	}
 
-	// use generated group by command
+	log.Println("group by a string")
 	grouped := MyTypeSlice(t).GroupByString(func(m MyType) string { return m.name })
 
 	for name, elements := range grouped {
 		log.Printf("name=%q elements=%v", name, elements)
 	}
 
-	// count specific elements
-
+	log.Println("count specific elements")
 	q := "rawr"
 	count := MyTypeSlice(t).Count(func(m MyType) bool {
 		if m.name == q {
@@ -42,4 +43,17 @@ func main() {
 	})
 
 	log.Printf("Found %d %q-s", count, q)
+
+	nt := []NewType{
+		{m: t[0]},
+		{m: t[1]},
+		{m: t[2]},
+	}
+
+	log.Print("grouping by a custom type")
+	groupedByMyType := NewTypeSlice(nt).GroupByMyType(func(n NewType) MyType { return n.m })
+	for myType, groups := range groupedByMyType {
+		log.Printf("%+v: %+v", myType, groups)
+
+	}
 }
